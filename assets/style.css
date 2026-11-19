@@ -39,10 +39,17 @@ header {
     position: sticky;
     top: 0;
     z-index: 100;
-    background: rgba(9, 13, 22, 0.8);
+}
+
+header::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: rgba(9, 13, 22, 0.85);
     backdrop-filter: blur(12px);
     -webkit-backdrop-filter: blur(12px);
     border-bottom: 1px solid var(--border);
+    z-index: -1;
 }
 
 nav {
@@ -61,20 +68,16 @@ nav {
     color: var(--text);
     text-decoration: none;
     letter-spacing: -0.03em;
+    z-index: 101;
 }
 
-.logo::after {
-    content: "";
-}
-
-nav ul {
+.nav-links {
     list-style: none;
     display: flex;
     gap: 1.5rem;
-    flex-wrap: wrap;
 }
 
-nav ul a {
+.nav-links a {
     color: var(--muted);
     text-decoration: none;
     font-size: 0.9rem;
@@ -82,8 +85,22 @@ nav ul a {
     transition: color 0.2s ease;
 }
 
-nav ul a:hover {
+.nav-links a:hover {
     color: var(--accent);
+}
+
+/* Hide mobile controls on desktop */
+.menu-toggle {
+    position: absolute;
+    opacity: 0;
+    width: 1px;
+    height: 1px;
+    pointer-events: none;
+}
+
+.menu-btn,
+.menu-overlay {
+    display: none;
 }
 
 /* =========================================
@@ -521,18 +538,112 @@ footer {
 }
 
 /* =========================================
-   MOBILE RESPONSIVENESS
+   MOBILE RESPONSIVENESS & SIDE MENU
    ========================================= */
 @media (max-width: 768px) {
+    /* Keep logo on left and hamburger icon on right */
     nav {
+        flex-direction: row;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    /* Hamburger Button */
+    .menu-btn {
+        display: flex;
         flex-direction: column;
-    }
-
-    nav ul {
-        gap: 1rem;
         justify-content: center;
+        gap: 5px;
+        cursor: pointer;
+        padding: 4px;
+        z-index: 202;
+        position: relative;
     }
 
+    .menu-btn span {
+        display: block;
+        width: 24px;
+        height: 2px;
+        background: var(--text);
+        border-radius: 2px;
+        transition: transform 0.3s ease, opacity 0.3s ease;
+    }
+
+    .menu-toggle:focus-visible ~ .menu-btn {
+        outline: 2px solid var(--accent);
+        outline-offset: 4px;
+        border-radius: 4px;
+    }
+
+    /* Animate Hamburger into "X" when open */
+    .menu-toggle:checked ~ .menu-btn span:nth-child(1) {
+        transform: translateY(7px) rotate(45deg);
+    }
+
+    .menu-toggle:checked ~ .menu-btn span:nth-child(2) {
+        opacity: 0;
+    }
+
+    .menu-toggle:checked ~ .menu-btn span:nth-child(3) {
+        transform: translateY(-7px) rotate(-45deg);
+    }
+
+    /* Dark Blurred Overlay Behind Side Menu */
+    .menu-overlay {
+        display: block;
+        position: fixed;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.6);
+        backdrop-filter: blur(4px);
+        -webkit-backdrop-filter: blur(4px);
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity 0.3s ease;
+        z-index: 200;
+    }
+
+    .menu-toggle:checked ~ .menu-overlay {
+        opacity: 1;
+        pointer-events: auto;
+    }
+
+    /* Slide-Out Side Drawer */
+    .nav-links {
+        position: fixed;
+        top: 0;
+        right: -100%;
+        width: 260px;
+        max-width: 80vw;
+        height: 100vh;
+        background: #0d1320;
+        border-left: 1px solid var(--border);
+        box-shadow: -12px 0 35px rgba(0, 0, 0, 0.55);
+        flex-direction: column;
+        justify-content: center;
+        align-items: flex-start;
+        padding: 5rem 2rem 2rem;
+        gap: 1.25rem;
+        transition: right 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+        z-index: 201;
+    }
+
+    .menu-toggle:checked ~ .nav-links {
+        right: 0;
+    }
+
+    .nav-links li {
+        width: 100%;
+    }
+
+    .nav-links a {
+        display: block;
+        width: 100%;
+        font-size: 1.1rem;
+        padding: 0.5rem 0;
+        border-bottom: 1px solid rgba(148, 163, 184, 0.08);
+    }
+
+    /* Mobile Page Content Layout */
     #hero {
         flex-direction: column-reverse;
         text-align: center;
@@ -554,9 +665,16 @@ footer {
         height: 190px;
     }
 
+    .project-featured {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 1.25rem;
+    }
+
     .about-grid,
     .timeline,
     .skills-grid,
+    .projects-grid,
     .contact-grid {
         grid-template-columns: 1fr;
     }
